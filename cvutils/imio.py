@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+
+
 """
 Image input-output functions.
 Created on Thu Apr 19 22:00:00 2018
@@ -134,4 +137,3 @@ def imvalidate(array):
             flag = True
     
     return flag
-
