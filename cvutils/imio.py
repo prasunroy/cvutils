@@ -9,6 +9,9 @@ GitHub: https://github.com/prasunroy/cvutils
 
 # imports
 import cv2
+import numpy
+import os
+import requests
 
 
 # reads an image file
@@ -26,20 +29,25 @@ def imread(path, flag=1):
         WebP      : *.webp
     
     Args:
-        path (str) : Path to the image file.
+        path (str) : Path to an image file or an image url.
         flag (int) : Read flag. Defaults to 1.
                      >0 -- read as color image (ignores alpha channel)
                      =0 -- read as grayscale image
                      <0 -- read as color image (keeps alpha channel)
     
     Returns:
-        A numpy array if read is successful None otherwise. The order of
-        channels is BGR(A) when reading as color image.
+        An image as numpy array if read is successful None otherwise. The order
+        of channels is BGR(A) when reading as color image.
     
     """
     image = None
     try:
-        image = cv2.imread(path, flag)
+        if os.path.exists(path):
+            image = cv2.imread(path, flag)
+        else:
+            image = bytearray(requests.get(path).content)
+            image = numpy.asarray(image, dtype='uint8')
+            image = cv2.imdecode(image, flag)
     except:
         pass
     
@@ -70,10 +78,60 @@ def imwrite(path, image):
     
     """
     flag = False
+    if imvalidate(image):
+        try:
+            cv2.imwrite(path, image)
+            flag = True
+        except:
+            pass
+    
+    return flag
+
+
+# shows an image in a window
+def imshow(image, title=''):
+    """Shows an image in a window.
+    
+    Args:
+        image : Image source. This can be either a numpy array or a path to an
+                image file or an image url.
+        title : Window title. Defaults to an empty string.
+    
+    Returns:
+        None
+    
+    """
     try:
-        cv2.imwrite(path, image)
-        flag = True
+        if not imvalidate(image):
+            image = imread(image, -1)
+        if imvalidate(image):
+            cv2.imshow(str(title), image)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
     except:
         pass
     
+    return
+
+
+# validates a numpy array as image
+def imvalidate(array):
+    """Validates a numpy array as image.
+    
+    Args:
+        image : A numpy array.
+    
+    Returns:
+        True if the array is a valid image False otherwise.
+    
+    """
+    flag = False
+    if type(array) is numpy.ndarray and array.size > 0:
+        dims = len(array.shape)
+        if dims == 1 or dims == 2:
+            flag = True
+        elif dims == 3 and array.shape[-1] in [1, 3, 4]:
+            flag = True
+    
     return flag
+
