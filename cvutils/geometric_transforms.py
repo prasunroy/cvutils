@@ -60,7 +60,7 @@ def rotate(image, angle=0):
         # get dimension of the image
         h, w = image.shape[:2]
         
-        # calulate center of the image
+        # calculate center of the image
         center = (w/2, h/2)
         
         # construct transformation matrix and rotate the image
@@ -68,6 +68,49 @@ def rotate(image, angle=0):
         R = cv2.warpAffine(image, M, (w, h))
     
     return R
+
+
+# scaling
+def scale(image, size=(-1, -1)):
+    """Scales an image into a specified dimension.
+    
+    Args:
+        image : An image as a numpy array.
+        size  : Size of the scaled image as integer tuple (width, height).
+                Preserves aspect ratio after scaling if either width or height
+                is <= 0. Does not perform scaling if both width and height
+                are <= 0. Defaults to (-1, -1).
+    
+    Returns:
+        The scaled image as a numpy array if the input is a valid image
+        None otherwise.
+    
+    """
+    S = None
+    image = validate(image)
+    if not image is None:
+        S = image
+        
+        # get dimension of the image
+        h, w = image.shape[:2]
+        
+        # calculate aspect ratio of the image as width:height
+        r = w / h
+        
+        # get dimension of the scaled image
+        sw, sh = size
+        
+        # calculate dimension of the scaled image
+        if sw > 0 and sh <= 0:
+            sh = int(sw / r)
+        elif sw <= 0 and sh > 0:
+            sw = int(sh * r)
+        
+        # scale image
+        if sw > 0 and sh > 0:
+            S = cv2.resize(image, (sw, sh))
+    
+    return S
 
 
 # validates an input as image
@@ -90,4 +133,3 @@ def validate(src):
             image = src
     
     return image
-
