@@ -30,15 +30,15 @@ def imread(path, flag=1):
         WebP      : *.webp
     
     Args:
-        path (str) : Path to an image file or an image url.
-        flag (int) : Read flag. Defaults to 1.
-                     >0 -- read as color image (ignores alpha channel)
-                     =0 -- read as grayscale image
-                     <0 -- read as color image (keeps alpha channel)
+        path : Path to an image file or an image url.
+        flag : Read flag. Defaults to 1.
+               >0 -- read as color image (ignores alpha channel)
+               =0 -- read as grayscale image
+               <0 -- read as color image (keeps alpha channel)
     
     Returns:
-        An image as numpy array if read is successful None otherwise. The order
-        of channels is BGR(A) when reading as color image.
+        An image as a numpy array if read is successful None otherwise.
+        The order of channels is BGR(A) when reading as color image.
     
     """
     image = None
@@ -94,7 +94,7 @@ def imshow(image, title=''):
     """Shows an image in a window.
     
     Args:
-        image : Image source. This can be either a numpy array or a path to an
+        image : Image source. This can be either a numpy array, a path to an
                 image file or an image url.
         title : Window title. Defaults to an empty string.
     
@@ -120,7 +120,7 @@ def imvalidate(array):
     """Validates a numpy array as image.
     
     Args:
-        image : A numpy array.
+        array : A numpy array.
     
     Returns:
         True if the array is a valid image False otherwise.
