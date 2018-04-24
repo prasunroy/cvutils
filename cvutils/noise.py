@@ -10,6 +10,7 @@ GitHub: https://github.com/prasunroy/cvutils
 
 # imports
 import numpy
+import random
 
 
 # applies a noise model to an image
@@ -25,22 +26,45 @@ def imnoise(image, model, mu=0, sigma=0, density=0):
                   noise model. Defaults to 0.
         sigma   : Standard deviation of Gaussian distribution. Only applicable
                   for Gaussian noise model. Defaults to 0.
-        density : Approximate fraction of image pixels affected by noise. Only
-                  applicable for Salt and Pepper noise model.
+        density : Fraction of image pixels affected by noise. Only applicable
+                  for Salt and Pepper noise model. Defaults to 0.
     
     Returns:
         A noisy image as a numpy array if the input is a valid image
         None otherwise.
     
     """
-    image = None
     image = validate(image)
     if not image is None:
+        image = image.copy()
+        if len(image.shape) == 2:
+            image = numpy.expand_dims(image, 2)
+        
+        # get dimension of the image
+        h, w = image.shape[:2]
+        
+        # apply a noise model
         model = model.upper()
         if model == 'GAUSSIAN':
             pass
         elif model == 'SALT-AND-PEPPER':
-            pass
+            if density < 0:
+                density = 0
+            elif density > 1:
+                density = 1
+            x = random.sample(range(w), w)
+            y = random.sample(range(h), h)
+            x, y = numpy.meshgrid(x, y)
+            xy = numpy.c_[x.reshape(-1), y.reshape(-1)]
+            n = int(w * h * density)
+            n = random.sample(range(w*h), n)
+            for i in n:
+                if random.random() > 0.5:
+                    image[xy[i][1], xy[i][0], :] = 255
+                else:
+                    image[xy[i][1], xy[i][0], :] = 0
+            if image.shape[-1] == 1:
+                image = numpy.squeeze(image, 2)
     
     return image
 
