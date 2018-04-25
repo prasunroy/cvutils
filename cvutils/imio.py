@@ -13,6 +13,7 @@ import cv2
 import numpy
 import os
 import requests
+from .validation import imvalidate
 
 
 # reads an image file
@@ -79,12 +80,13 @@ def imwrite(path, image):
     
     """
     flag = False
-    if imvalidate(image):
-        try:
+    try:
+        image = imvalidate(image)
+        if not image is None:
             cv2.imwrite(path, image)
             flag = True
-        except:
-            pass
+    except:
+        pass
     
     return flag
 
@@ -103,35 +105,15 @@ def imshow(image, title=''):
     
     """
     try:
-        if not imvalidate(image):
-            image = imread(image, -1)
-        if imvalidate(image):
-            cv2.imshow(str(title), image)
+        array = imvalidate(image)
+        if array is None:
+            array = imread(image, -1)
+            array = imvalidate(array)
+        if not array is None:
+            cv2.imshow(str(title), array)
             cv2.waitKey(0)
             cv2.destroyAllWindows()
     except:
         pass
     
     return
-
-
-# validates a numpy array as image
-def imvalidate(array):
-    """Validates a numpy array as image.
-    
-    Args:
-        array : A numpy array.
-    
-    Returns:
-        True if the array is a valid image False otherwise.
-    
-    """
-    flag = False
-    if type(array) is numpy.ndarray and array.size > 0:
-        dims = len(array.shape)
-        if dims == 1 or dims == 2:
-            flag = True
-        elif dims == 3 and array.shape[-1] in [1, 3, 4]:
-            flag = True
-    
-    return flag

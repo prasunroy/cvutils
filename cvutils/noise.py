@@ -9,8 +9,10 @@ GitHub: https://github.com/prasunroy/cvutils
 
 
 # imports
+import cv2
 import numpy
 import random
+from .validation import imvalidate
 
 
 # applies a noise model to an image
@@ -27,16 +29,18 @@ def imnoise(image, model, mu=0, sigma=0, density=0):
         sigma   : Standard deviation of Gaussian distribution. Only applicable
                   for Gaussian noise model. Defaults to 0.
         density : Fraction of image pixels affected by noise. Only applicable
-                  for Salt and Pepper noise model. Defaults to 0.
+                  for Salt and Pepper noise model. Defaults to 0. Should be a
+                  value between 0 and 1.
     
     Returns:
         A noisy image as a numpy array if the input is a valid image
         None otherwise.
     
     """
-    image = validate(image)
+    image = imvalidate(image)
     if not image is None:
         image = image.copy()
+        
         if len(image.shape) == 2:
             image = numpy.expand_dims(image, 2)
         
@@ -45,9 +49,17 @@ def imnoise(image, model, mu=0, sigma=0, density=0):
         
         # apply a noise model
         model = model.upper()
+        
         if model == 'GAUSSIAN':
-            pass
+            # Gaussian noise
+            noise = numpy.random.normal(mu, sigma, (h, w))
+            noise = numpy.dstack([noise]*image.shape[-1])
+            image = image + noise
+            image = cv2.normalize(image, None, 0, 255,
+                                  cv2.NORM_MINMAX, cv2.CV_8UC1)
+        
         elif model == 'SALT-AND-PEPPER':
+            # Salt and Pepper noise
             if density < 0:
                 density = 0
             elif density > 1:
@@ -65,27 +77,5 @@ def imnoise(image, model, mu=0, sigma=0, density=0):
                     image[xy[i][1], xy[i][0], :] = 0
             if image.shape[-1] == 1:
                 image = numpy.squeeze(image, 2)
-    
-    return image
-
-
-# validates an input as image
-def validate(src):
-    """Validates an input as image.
-    
-    Args:
-        src : Input to be validated.
-    
-    Returns:
-        A numpy array if the input is a valid image None otherwise.
-    
-    """
-    image = None
-    if type(src) is numpy.ndarray and src.size > 0:
-        dims = len(src.shape)
-        if dims == 1:
-            image = numpy.expand_dims(src, 1)
-        elif dims == 2 or (dims == 3 and src.shape[-1] in [1, 3, 4]):
-            image = src
     
     return image

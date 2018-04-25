@@ -11,6 +11,7 @@ GitHub: https://github.com/prasunroy/cvutils
 # imports
 import cv2
 import numpy
+from .validation import imvalidate
 
 
 # translation
@@ -28,7 +29,7 @@ def translate(image, tx=0, ty=0):
     
     """
     T = None
-    image = validate(image)
+    image = imvalidate(image)
     if not image is None:
         # get dimension of the image
         h, w = image.shape[:2]
@@ -55,7 +56,7 @@ def rotate(image, angle=0):
     
     """
     R = None
-    image = validate(image)
+    image = imvalidate(image)
     if not image is None:
         # get dimension of the image
         h, w = image.shape[:2]
@@ -87,7 +88,7 @@ def scale(image, size=(-1, -1)):
     
     """
     S = None
-    image = validate(image)
+    image = imvalidate(image)
     if not image is None:
         S = image
         
@@ -134,7 +135,7 @@ def affine(image, src, dst):
     
     """
     A = None
-    image = validate(image)
+    image = imvalidate(image)
     if not image is None:
         # get dimension of the image
         h, w = image.shape[:2]
@@ -172,7 +173,7 @@ def perspective(image, src, dst):
     
     """
     P = None
-    image = validate(image)
+    image = imvalidate(image)
     if not image is None:
         # get dimension of the image
         h, w = image.shape[:2]
@@ -205,7 +206,7 @@ def perspective4P(image, points):
     
     """
     P = None
-    image = validate(image)
+    image = imvalidate(image)
     if not image is None:
         # order four corner points
         src = numpy.float32(points)
@@ -228,7 +229,7 @@ def perspective4P(image, points):
     return P
 
 
-# sort four corner points of a quadrilateral
+# sorts four corner points of a quadrilateral
 def sort4P(points):
     """Sorts four corner points of a quadrilateral in clockwise order of
        top-left, top-right, bottom-right, bottom-left.
@@ -282,6 +283,7 @@ def distance(p, q):
     """
     p = numpy.asarray(p).reshape(-1)
     q = numpy.asarray(q).reshape(-1)
+    
     assert p.size == q.size
     
     # calculate absolute difference
@@ -297,25 +299,3 @@ def distance(p, q):
     d8 = numpy.max(d)
     
     return [dE, d4, d8]
-
-
-# validates an input as image
-def validate(src):
-    """Validates an input as image.
-    
-    Args:
-        src : Input to be validated.
-    
-    Returns:
-        A numpy array if the input is a valid image None otherwise.
-    
-    """
-    image = None
-    if type(src) is numpy.ndarray and src.size > 0:
-        dims = len(src.shape)
-        if dims == 1:
-            image = numpy.expand_dims(src, 1)
-        elif dims == 2 or (dims == 3 and src.shape[-1] in [1, 3, 4]):
-            image = src
-    
-    return image
