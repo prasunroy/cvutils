@@ -17,7 +17,7 @@ from .validation import imvalidate
 
 
 # reads an image file
-def imread(path, flag=1):
+def imread(path, flag=-1):
     """Reads an image file.
     
     Supported image file formats:
@@ -32,14 +32,14 @@ def imread(path, flag=1):
     
     Args:
         path : Path to an image file or an image url.
-        flag : Read flag. Defaults to 1.
+        flag : Read flag. Defaults to -1.
                >0 -- read as color image (ignores alpha channel)
                =0 -- read as grayscale image
-               <0 -- read as color image (keeps alpha channel)
+               <0 -- read as original image (keeps alpha channel)
     
     Returns:
         An image as a numpy array if read is successful None otherwise.
-        The order of channels is BGR(A) when reading as color image.
+        The order of channels is BGR(A) for color image.
     
     """
     image = None
