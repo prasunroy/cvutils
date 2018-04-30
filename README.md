@@ -165,7 +165,7 @@ from cvutils.noise import imnoise
 image1 = imread('ArcticFox.jpg')
 image2 = imread('Kingfisher.jpg')
 
-# apply addtive white Gaussian noise
+# apply additive white Gaussian noise
 noisy1_awgn = imnoise(image1, model='Gaussian', mu=0, sigma=25)
 noisy2_awgn = imnoise(image2, model='Gaussian', mu=0, sigma=50)
 
