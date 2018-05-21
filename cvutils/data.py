@@ -16,8 +16,68 @@ import glob
 import json
 import numpy
 import os
+import requests
 
 from scipy.io import savemat
+
+
+# downloads images from ImageNet (http://www.image-net.org)
+def fetch_imagenet(dst, wnids=[], limit=0, verbose=True):
+    """Downloads images from ImageNet (http://www.image-net.org).
+    
+    Args:
+        dst     : Destination directory for images.
+        wnids   : A list of wnid strings of ImageNet synsets to download.
+                  Defaults to an empty list.
+        limit   : Maximum number of images to download from each specified
+                  synset. Downloads all images if limit <= 0. Defaults to 0.
+        verbose : Flag for verbose mode. Defaults to True.
+    
+    Returns:
+        None.
+    
+    """
+    api_url = 'http://image-net.org/api/text/imagenet.synset.geturls?wnid='
+    for wnid in wnids:
+        # check directory
+        path = os.path.join(dst, wnid)
+        if not os.path.isdir(path):
+            os.makedirs(path)
+        
+        # fetch image urls in synset
+        if verbose:
+            print('[INFO] Fetching image urls for synset {}... '.format(wnid), end='')
+        urls = requests.get(api_url + wnid).content
+        urls = urls.decode(encoding='utf-8').strip().split('\n')
+        if verbose:
+            print('got {} urls'.format(len(urls)))
+        
+        # download and save images
+        count = 0
+        if verbose:
+            print('\r[INFO] Downloading images from synset {}... got {} images'.format(wnid, count), end='')
+        for url in urls:
+            try:
+                image = bytearray(requests.get(url.strip()).content)
+                image = numpy.asarray(image, dtype='uint8')
+                image = cv2.imdecode(image, -1)
+                if image is None:
+                    raise Exception
+                fname = str(count).zfill(len(str(len(urls)))) + '.jpg'
+                cv2.imwrite(os.path.join(path, fname), image)
+            except:
+                continue
+            count += 1
+            if verbose:
+                print('\r[INFO] Downloading images from synset {}... got {} images'.format(wnid, count), end='')
+            if limit > 0 and count >= limit:
+                break
+        if verbose:
+            print('')
+    if verbose:
+        print('[INFO] Download complete')
+    
+    return
 
 
 # builds labeled dataset from structurally organized images
